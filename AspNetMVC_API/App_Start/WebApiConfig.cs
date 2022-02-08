@@ -31,6 +31,7 @@ namespace AspNetMVC_API
             {
                 ContractResolver = new CamelCasePropertyNamesContractResolver()
             };  //Paste Ends
+            config.Formatters.JsonFormatter.SupportedMediaTypes.Add(new MediaTypeHeaderValue("multipart/form-data"));
         }
     }
 }

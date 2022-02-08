@@ -10,6 +10,7 @@ using AspNetMVC_API_Entity.Models;
 
 namespace AspNetMVC_API.Controllers
 {
+    [System.Web.Http.RoutePrefix("student")]
     public class StudentController : ApiController
     {
         StudentRepo studentRepo = new StudentRepo();
@@ -57,6 +58,7 @@ namespace AspNetMVC_API.Controllers
             }
         }
 
+        [System.Web.Http.Route("detail/{id:int:min(1)}")]
         public ResponseData GetDetail(int id)
         {
             try

@@ -3,6 +3,7 @@ using AspNetMVC_API_Entity.Models;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Linq;
 using System.Web;
 using System.Web.Services;
@@ -20,6 +21,43 @@ namespace AspNetMVC_API
     public class WebServiceStudent : System.Web.Services.WebService
     {
         StudentRepo studentRepo = new StudentRepo();
+        private bool IsAuthenticated
+        {
+            get
+            {
+                bool result = false;
+                try
+                {
+                    string authorization = "";
+                    authorization = HttpContext.Current.Request.Headers["Authorization"];
+                    if (authorization != null)
+                    {
+                        authorization = authorization.Replace("Basic", "");
+                        byte[] byteArray = Convert.FromBase64String(authorization);
+                        string usernamePassword = System.Text.Encoding.UTF8.GetString(byteArray);
+                        //programming103:103103 <= username:password form
+                        bool usernameResult = usernamePassword.Split(':').First().Equals(ConfigurationManager.AppSettings["USERNAME"].ToString());
+                        bool passwordResult = usernamePassword.Split(':').Last().Equals(ConfigurationManager.AppSettings["PASSWORD"].ToString());
+
+                        result = (usernameResult && passwordResult) ? true : false;
+                    }
+                    return result;
+                }
+                catch (Exception ex)
+                {
+                    result = false;
+                    return result;
+                }
+            }
+        }
+
+        private void CheckCredentials()
+        {
+            if (!IsAuthenticated)
+            {
+                throw new Exception("Wrong username or password entry. Try again");
+            }
+        }
 
         [WebMethod]
         public string HelloWorld()
@@ -32,6 +70,7 @@ namespace AspNetMVC_API
         {
             try
             {
+                CheckCredentials();
                 List<Student> list = studentRepo.GetAll();
                 return list;
             }
@@ -46,6 +85,7 @@ namespace AspNetMVC_API
         {
             try
             {
+                CheckCredentials();
                 if (string.IsNullOrEmpty(name) || string.IsNullOrEmpty(surname))
                 {
                     throw new Exception("Both name and surname must be provided!");
@@ -82,6 +122,7 @@ namespace AspNetMVC_API
         {
             try
             {
+                CheckCredentials();
                 if (id > 0)
                 {
                     Student student = studentRepo.GetById(id);
@@ -115,6 +156,7 @@ namespace AspNetMVC_API
         {
             try
             {
+                CheckCredentials();
                 if (currentId <= 0)
                 {
                     throw new Exception("Provided id must be greater than zero!");
@@ -156,5 +198,7 @@ namespace AspNetMVC_API
                 return ex.Message;
             }
         }
+
+
     }
 }
